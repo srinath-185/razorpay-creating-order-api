@@ -31,8 +31,8 @@ Set up environment variables for Razorpay: Create a .env file in the root of you
 
 ```
 {
-CWJ_RAZORPAY_KEY_ID=your_key_id
-CWJ_RAZORPAY_SECRET_KEY=your_secret_key
+RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_SECRET_KEY=your_secret_key
 }
 ```
 Replace your_key_id and your_secret_key with your actual Razorpay credentials.

@@ -4,8 +4,8 @@ const short = require('shortid')
 const app = express();
 
 //Razorpay key id and secret key
-const key_id = process.env.CWJ_RAZORPAY_KEY_ID
-const key_secret = process.env.CWJ_RAZORPAY_SECRET_KEY;
+const key_id = process.env.RAZORPAY_KEY_ID
+const key_secret = process.env.RAZORPAY_SECRET_KEY;
 
 app.use(express.json());
        

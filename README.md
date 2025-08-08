@@ -1,115 +1,155 @@
 # Payment Gateway Integration with Razorpay and Express.js
 
-This project provides a simple integration of the Razorpay payment gateway using Node.js and Express.js. It enables the creation of Razorpay orders for payments in INR currency.
+This project provides a robust integration of the Razorpay payment gateway using Node.js and Express.js. It supports order creation, request validation, stored procedure mapping, and logging — suitable for production-ready applications.
 
-## Requirements
+# Requirements
+Node.js (v14.x or later)
 
-- Node.js (v14.x or later)
-- Razorpay Account (for API key and secret)
-- Express.js
-- ShortID for generating unique receipt IDs
+Razorpay Account (for API Key & Secret)
 
-## Installation
+MySQL Database (with stored procedure support)
 
-1. Clone the repository or download the code:
-   ```
-   git clone https://github.com/your-username/payment-gateway.git
-```
-Navigate into the project directory:
+Express.js
 
-```
+shortid for unique receipt IDs
+
+Joi for request validation
+
+# Installation
+Clone the repository:
+
+bash
+Copy
+Edit
+git clone https://github.com/your-username/payment-gateway.git
 cd payment-gateway
+Install dependencies:
 
-``
-Install the required dependencies:
-
-```
+bash
+Copy
+Edit
 npm install
-```
+Set up environment variables:
+Create a .env file in the project root with the following:
 
-Set up environment variables for Razorpay: Create a .env file in the root of your project and add the following:
-
-```
-{
+env
+Copy
+Edit
 RAZORPAY_KEY_ID=your_key_id
 RAZORPAY_SECRET_KEY=your_secret_key
-}
-```
 Replace your_key_id and your_secret_key with your actual Razorpay credentials.
 
-Running the Application
-To start the application, run:
-```
+🚀 Running the Application
+Start the application with:
+
+bash
+Copy
+Edit
 node app.js
-```
+By default, it runs on:
+👉 http://localhost:3000/
 
-By default, it will run on http://localhost:3000/.
-
-API Endpoint
-Create Payment Order
-URL: /payment-gateway
+📡 API Endpoint
+🎯 Create Payment Order
+URL: /api/razorpay/order
 
 Method: POST
 
-Request Body:
-
+📥 Request Body:
 json
-```
+Copy
+Edit
 {
-  "amount": 1000
+  "amount": 1000,
+  "org_id": 1,
+  "user_id": 101,
+  "payment_mode_id": 2,
+  "scheme_transactions": [
+    {
+      "scheme_id": 5,
+      "scheme_payment_transaction_id": 301
+    }
+  ]
 }
-```
-amount: The payment amount in INR (without decimals).
-Response:
+amount – Amount in INR (e.g. 1000 = ₹1000)
 
-On success, the API returns the created order and the requested amount:
+org_id, user_id – Organization/User reference
+
+payment_mode_id – Reference to payment method
+
+scheme_transactions (optional) – Array of scheme-payment mappings
+
+📤 Response:
+Success:
+
 json
-```
+Copy
+Edit
 {
   "success": true,
   "order": {
-    "id": "order_HZ5G8pCQW0iObv",
-    "entity": "order",
+    "id": "order_LdqwDfP7xT9nzt",
     "amount": 100000,
     "currency": "INR",
-    "receipt": "CWJ_pKfcY9FGs",
-    ...
+    "receipt": "SriCWJ_A1b2C3"
+    // Other Razorpay fields...
   },
   "amount": 1000
 }
+Failure:
 
-```
-On failure, the API returns an error with a status code of 500.
-Project Structure
+json
+Copy
+Edit
+{
+  "success": false,
+  "message": "Error creating payment order"
+}
+🧠 How It Works
+Validates input using Joi schema
 
-├── app.js                # Entry point of the application  
-├── package.json          # Project metadata and dependencies  
-├── README.md             # Project documentation  
-└── .env                  # Environment variables for Razorpay credentials  
+Initializes Razorpay using environment credentials
 
+Creates order with amount × 100 (Razorpay uses paise)
 
-## How It Works
+Generates receipt using shortid (e.g., SriCWJ_xxx)
 
-The Razorpay instance is initialized using your key ID and secret key from the environment variables.
-The paymentGateway function receives a POST request with an amount.
-It creates a Razorpay order with the amount multiplied by 100 (since Razorpay accepts the amount in paise).
-A unique receipt ID is generated using the shortid package and concatenated with the string 'CWJ'.
-The created order is sent back to the client as the API response.
-Dependencies
-Express: A minimal and flexible Node.js web application framework.
-Razorpay: A Razorpay SDK for integrating payment gateway functionality.
-ShortID: A package to generate short non-sequential unique IDs.
+Maps order to scheme transactions using stored procedure:
 
+sql
+Copy
+Edit
+CALL usp_insert_create_order_mapping(order_id, org_id, user_id, amount, payment_mode_id, razorpay_order_json);
+Logs activity (e.g., auditLog('Razorpay order created', { ... }))
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+🗃️ Project Structure
+bash
+Copy
+Edit
+├── app.js                         # Entry point
+├── controllers/
+│   └── razorpay.controller.js    # Razorpay integration logic
+├── .env                          # API credentials
+├── package.json                  # Dependencies
+└── README.md                     # Project documentation
+📦 Dependencies
+Package	Description
+express	Web framework for Node.js
+razorpay	Razorpay SDK for Node.js
+shortid	Generate short unique receipt IDs
+joi	Input validation
+mysql	Database connector for stored procedures
+dotenv	Load environment variables from .env
+winston	Logging system (optional, for audits)
 
-## Notes:
-1. You can adjust the project structure depending on how your application is organized.
-2. Make sure to add your actual Razorpay credentials in the `.env` file.
-3. The `shortid` package is used to generate unique receipt IDs for each order created.
+📄 License
+This project is licensed under the MIT License – see the LICENSE file for details.
 
+🔖 Notes
+Update the stored procedure name and parameters as per your actual MySQL logic.
 
+Always validate payment success using Razorpay webhook verification (recommended).
 
+Secure your API routes using authentication middleware (e.g., JWT).
 
-
+Replace "Sri" with dynamic org shortcode if needed.
